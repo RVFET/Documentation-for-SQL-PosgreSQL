@@ -47,3 +47,5 @@ EXECUTE [dbo].[GetNewPayment]
 --,@Top=10
 --,@Debug
 GO
+
+--Service ID should be taken from Portal not from UPG
