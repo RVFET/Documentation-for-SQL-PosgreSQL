@@ -9,6 +9,7 @@ s."name" as Name
   join public.services s on m.id_service = s.id_service 
   where (m.time_point BETWEEN '2021-09-23 09:00:00' AND '2021-09-23 10:00:00')
   and m.state = 60 --m.substate=0
+  and m.id_point != 8
   GROUP BY m.id_service, s."name") dp
   LEFT JOIN 
   (select m.id_service
@@ -17,7 +18,8 @@ s."name" as Name
  RejectCount
   FROM operations.master m 
   where (m.time_point BETWEEN '2021-09-23 09:00:00' AND '2021-09-23 10:00:00')
-  and m.state != 60  --m.substate=1
+  and m.state = 80  --m.substate=1
+  and m.id_point != 8
   GROUP BY  m.id_service
   ) rp ON dp.id_service=rp.id_service
   order by dp.id_service
