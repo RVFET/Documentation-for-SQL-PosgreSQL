@@ -1,0 +1,27 @@
+[PrinterErrorID]
+
+2 - Принтер: Бумага зажевана 
+
+1 - Принтер: Закончилась бумага 
+
+3 - Принтер: Ошибка связи с принтером 
+
+213 - Принтер: Принтер не найден 
+
+SELECT [PointID]
+, Count(*) count
+,MIN(LAstUpdate) mindate
+, MAX(lastUpdate) maxdate
+  FROM [Main].[dbo].[TerminalHistory]
+  where PrinterErrorID=1
+  group by PointID
+
+
+
+SELECT TOP (1000) [CashOutID]
+      ,[PointID]
+      ,[CashOutDate]
+      ,[CashOutUnitsCount]
+      ,[CashOutUnitsSum]
+      ,[CashOutType]
+  FROM [Main].[dbo].[TerminalCashOut]
