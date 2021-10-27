@@ -1,3 +1,26 @@
+1. Find which terminal is out of paper and when is it filled  
+
+
+Select a.PointId, a.begindate, a.enddate, b.CashoutDate, b.countcashout
+from
+(SELECT [PointID]
+, Count(*) count
+,MIN(LAstUpdate) begindate
+, MAX(lastUpdate) enddate
+  FROM [Main].[dbo].[TerminalHistory]
+  where PrinterErrorID=1 and LastUpdate > '2021-10-26' and LastUpdate < '2021-10-27'
+  group by PointID) a
+  left join  
+(Select c.PointId,
+COUNT(cashoutdate) countcashout,
+min(cashoutdate) CashoutDate
+from [Main].[dbo].[TerminalCashOut] c
+where  CashOutDate > '2021-10-26' and CashOutDate < '2021-10-27' 
+  group by c.PointID) b
+  on a.PointID = b.PointID
+  group by a.PointId, a.begindate, a.enddate, b.CashoutDate, b.countcashout
+
+
 [PrinterErrorID]
 
 2 - Принтер: Бумага зажевана 
