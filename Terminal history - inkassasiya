@@ -25,3 +25,19 @@ SELECT TOP (1000) [CashOutID]
       ,[CashOutUnitsSum]
       ,[CashOutType]
   FROM [Main].[dbo].[TerminalCashOut]
+
+
+
+which terminals printer didn't filled
+
+ SELECT h.[PointID]
+, Count(*) count
+,MIN(lastUpdate) mindate
+, MAX(lastUpdate) maxdate
+, max(CashOutDate) maxcashoutdate
+  FROM [Main].[dbo].[TerminalHistory] h
+   join [Main].[dbo].[TerminalCashOut] t
+  on h.PointID = t.PointID
+  where PrinterErrorID=1 
+  group by h.PointID,CashOutDate
+  having MIN(LAstUpdate)<max(CashOutDate) and max(CashOutDate)<DATEADD (mi,10,min(LastUpdate)) and min(lastupdate) < MAX (LastUpdate)
