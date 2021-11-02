@@ -19,7 +19,7 @@ https://github.com/elvinaqa/eManat-SQL/blob/main/AllProviderSum/UPG_Payment_17_1
 
 6.Pivot
 
-7. add Kartdan balansin artirilmasi to table. (get_report_by_services) SELECT public.get_report_by_services('2021-08-01','2021-08-03');
+7. add Kartdan balansin artirilmasi to table. SELECT public.get_report_by_services('2021-10-01','2021-10-31');
 
 8. Add amounts from Elvin Amrahlis report
 
