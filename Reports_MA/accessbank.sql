@@ -19,4 +19,4 @@ join gate211.dbo.Osmp_Service os on os.ServiceID = s.ServiceID
 
 WHERE StatusDate between '2021-03-01' and '2021-04-01' and p.Status = 2 and 
 
-s.ServiceID in (418 ,419,420,421 ,422,423) -- and  ReceiveDate >'2018-12-01' and Number = '6900283441'
+s.ServiceID in (418 ,419,420,421 ,422,423,599) -- and  ReceiveDate >'2018-12-01' and Number = '6900283441'
