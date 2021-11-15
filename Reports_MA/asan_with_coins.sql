@@ -29,3 +29,4 @@ WHERE p.GateServiceID in (635, 636,653,676,692,693,702,708,709,710,711,712,713,7
 and StatusDate BETWEEN @DateFrom and @DateTo
 and CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) <> '3'
 and PaySum>0.99
+and Status = 2
