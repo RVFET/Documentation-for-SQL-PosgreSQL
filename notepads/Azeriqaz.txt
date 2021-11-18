@@ -65,6 +65,19 @@ step5: Report hazirlamaq ucun yekun meblegi cixarmaq ucun ise asagidaki sorgular
   
   
 				AZERIQAZ AGIS
+setp1.CREATE
+
+SELECT --top 120-- AzerQazDirect 
+OsmpProviderID,
+AgentPaymentID as AzeriQazID, ReceiveDate, Number, PaySum, Status
+  INTO   [10october2021_recon].[dbo].AgisM
+  FROM [gate211].[dbo].[Payment]  
+where
+  ServiceID = 275 and 
+  StatusDate Between '2021-10-01'and'2021-11-01'
+   and CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) <> '3'
+ order by ProviderDate
+ 
 step3:
 SELECT  count(*), a.TRN,a.PUL,m.PaySum,m.AzeriQazID,m.Status,
 CASE WHEN m.PaySum > 0 THEN 'MUSBET' ELSE 'MENFI' 
