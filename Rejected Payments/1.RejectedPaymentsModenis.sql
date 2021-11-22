@@ -1,6 +1,6 @@
 EXECUTE  [dbo].[GetNewPayment] 
- @Login = N'aqammadzadae'
-,@PasswordMD5 = N'c2caea1c32db0492a967feb3743fb168'
+ @Login = N'abdullayevc'
+,@PasswordMD5 = N'0eda0f98bb80d3b83bbfec0d9a7c7e38'
 ,@DealerID=16 --5
   --,@TransactionID
   --,@PaymentID=189250177
