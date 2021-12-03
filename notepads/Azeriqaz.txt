@@ -106,10 +106,9 @@ where m.AzeriQazID is null or a.TRN is null
 				
 				ZENNER AZERIQAZ
 STEP 1.
-
-select StatusDate as PaymentCreateDate,OsmpProviderID,CAST([ExtraParams].query('data(r/online_trm_prv_id)') as nvarchar) as trn,CAST([ExtraParams].query('data(r/trm_prv_id)') as nvarchar) as trn2,
-AgentPaymentID as AzeriQazID, ReceiveDate, Number, PaySum, Status,ServiceID --into [11november2021_recon].dbo.ZennerModenis
-	from gate211.dbo.Payment where ServiceID in ( 992,993)
+select StatusDate as PaymentCreateDate,OsmpProviderID, p.ProviderPaymentIDString,
+AgentPaymentID as AzeriQazID, ReceiveDate, Number, PaySum, Status,ServiceID into [11november2021_recon].dbo.ZennerModenis
+	from gate211.dbo.Payment p where ServiceID in ( 992)
 and StatusDate Between '2021-11-01'and'2021-12-01'
  and
   CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) <> '3' and status=2
