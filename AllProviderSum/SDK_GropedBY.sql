@@ -1,4 +1,4 @@
-select "ID","Service Name", SUM("Amount") as Amount, "Description", "Agent", SUM("ChargeCommission") as ChargeCommission,SUM("PurchaseCommission")as PurchaseCommission, SUM("OtherCommissions") as  OtherCommissions from (
+select "ID","Service Name", SUM("Amount") as Amount, "Description", "Agent", SUM("ChargeCommission") as ChargeCommission,SUM("PurchaseCommission")as PurchaseCommission, SUM("OtherCommissions") as  OtherCommissions, COUNT("P_ID") as COUNT from (
 
 with commissions as 
 	(			
