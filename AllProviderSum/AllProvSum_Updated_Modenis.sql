@@ -53,7 +53,7 @@ from (select
 
 CASE
     when CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) in ('17', '18')
-	then PaySum - sd.chargecommission - sd.chargecommission
+	then PaySum - sd.chargecommission - sd.purchasecommission
     when p.ServiceID in(618) 
 	then CAST(CAST (p.[PaymentInfo].query('data(root/payable)') as nvarchar) as float)
 	when  p.OsmpProviderID in (18106,18107)
@@ -67,7 +67,7 @@ CASE
 CASE
 when CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) in ('17', '18')
 then (CASE when sd.chargecommission is null then 0.00 else sd.chargecommission end)
-else 0.00 end as CardCommissionAmount
+ else 0.00 end as CardCommissionAmount
 ,
 --adding commissionsum to agent 17 and 18
 
@@ -110,7 +110,7 @@ join [DWHTEST].[dbo].Service s with (nolock) on p.ServiceID=s.ServiceID join [DW
 
 --joining sdk and upg through main base
 
-join [DWHTEST].[dbo].[Paymentmain] m with (nolock) on p.AgentPaymentID = m.PaymentID join [DWHTEST].[dbo].[sdk] sd with (nolock) on m.TransactionID = sd.p_id
+join [DWHTEST].[dbo].[Paymentmain] m with (nolock) on p.AgentPaymentID = m.PaymentID left join [DWHTEST].[dbo].[sdk] sd with (nolock) on m.TransactionID = sd.p_id
 
 where (StatusDate between '2021-12-01' and '2022-01-01') 
 and CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) not in ( '3','10','14')
