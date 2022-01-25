@@ -1,4 +1,3 @@
-
 select pb.ID,pb.ServiceName, SUM(pb.PaySum) Amount,SUM(pb.ProviderSum) ProviderAmount,
 SUM(pb.CommissionSum) CommissionAmount, SUM(pb.CardCommissionAmount) CardCommissionAmount, count(*)
 
@@ -112,10 +111,26 @@ join [DWHTEST].[dbo].Service s with (nolock) on p.ServiceID=s.ServiceID join [DW
 
 join [DWHTEST].[dbo].[Paymentmain] m with (nolock) on p.AgentPaymentID = m.PaymentID left join [DWHTEST].[dbo].[sdk] sd with (nolock) on m.TransactionID = sd.p_id
 
-where (StatusDate between '2021-12-01' and '2022-01-01') 
+where (StatusDate between '2021-12-01' and '2021-12-02') 
 and CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) not in ( '3','10','14')
 and p.Status=2 
 )pb 
 --where pb.rn=1
+
 group by pb.ID, pb.ServiceName, pb.Agent ,pb.ProviderName
+
+--adding kartdan balansin artirilmasi
+
+UNION  all
+
+SELECT s.[id] as ID,s.[servicename]  as ServiceName, s.[total] as Amount, s.[amount] as ProviderAmount,
+s.[purchascomission] as CommissionAmount, s.[chargecomission] as CardCommissionAmount, s.[count ] as Count,
+s.[agent] as Agent ,'MPAY MMC'  as ProviderName  
+
+from [DWHTEST].[dbo].[sdk_report_by_services] s
+
+where s.id = 1018
 order by pb.ProviderName,pb.ServiceName
+
+
+
