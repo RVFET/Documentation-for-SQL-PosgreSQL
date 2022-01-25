@@ -52,7 +52,13 @@ from (select
 
 CASE
     when CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) in ('17', '18')
-	then PaySum - sd.chargecommission - sd.purchasecommission
+	then 
+	--checking null values
+	case
+	when sd.chargecommission is null or sd.purchasecommission is null
+	then PaySum
+	else PaySum - sd.chargecommission - sd.purchasecommission
+	end
     when p.ServiceID in(618) 
 	then CAST(CAST (p.[PaymentInfo].query('data(root/payable)') as nvarchar) as float)
 	when  p.OsmpProviderID in (18106,18107)
