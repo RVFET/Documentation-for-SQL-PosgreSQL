@@ -92,6 +92,7 @@ CASE
 	then 0.236
 	when p.ServiceID  in (254,255)
     then (p.[CommissionSum] + CAST(CAST(p.PaymentInfo.query('data(r/overpaid)') as nvarchar) as decimal(7,2))) 
+	when p.CommissionSum is null then 0.00
 	ELSE p.CommissionSum  END AS CommissionSum
 
 ,CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) as  agent,
