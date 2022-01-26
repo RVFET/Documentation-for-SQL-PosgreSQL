@@ -1,4 +1,4 @@
-select LEFT(pb.ID,10),pb.ServiceName, SUM(pb.PaySum) Amount,SUM(pb.ProviderSum) ProviderAmount,
+select LEFT(pb.ID,10) as ID,pb.ServiceName, SUM(pb.PaySum) Amount,SUM(pb.ProviderSum) ProviderAmount,
 SUM(pb.CommissionSum) CommissionAmount, SUM(pb.CardCommissionAmount) CardCommissionAmount, count(*)
 
  Count,
@@ -34,7 +34,7 @@ from (select
     WHEN LEFT(p.Number, 2) = '27' THEN N' Seki TSC'
     WHEN LEFT(p.Number, 2) = '80' THEN N' Gence TSC'
     WHEN LEFT(p.Number, 2) in ('28','29','44','64') THEN N' Birlesmis sukanal MMC'
-    ELSE ' Unknown'END
+    ELSE 'Unknown' END
   when p.ServiceID  in(291)
   then CASE WHEN p.PaySum<200 THEN s.ServiceName+' 200 az' ELSE s.ServiceName END 
   when p.ServiceID in(312,1242)
