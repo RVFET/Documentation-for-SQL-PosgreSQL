@@ -1,4 +1,3 @@
-/****** Script for SelectTopNRows command from SSMS  ******/
 SELECT 
 case 
 when  s.id  in ('18193','18239','18200','18184','18184','18233','18185','18185')
@@ -15,7 +14,7 @@ end ID
       ,[description] as ProviderName
      
       
-  FROM [DWHTEST].[dbo].[sdk] s
+  FROM [DWHTEST].[dbo].[sdk_provider_trnsaction] s
   where s.p_date between '2021-12-01' and '2022-01-01'
   group by s.id,s.description,s.service_name,s.agent
 
@@ -69,4 +68,4 @@ where s.id = 1017) - (select COUNT(p.PaymentID)
   group by  p.AgentTerminalID)    as Count,
 
 5 as Agent ,
-'Yığım (Modenis)'  as ProviderName  
+'Yığım (Modenis)'  as ProviderName
