@@ -1,4 +1,4 @@
-select pb.ID,pb.ServiceName, SUM(pb.PaySum) Amount,SUM(pb.ProviderSum) ProviderAmount,
+select LEFT(pb.ID,10),pb.ServiceName, SUM(pb.PaySum) Amount,SUM(pb.ProviderSum) ProviderAmount,
 SUM(pb.CommissionSum) CommissionAmount, SUM(pb.CardCommissionAmount) CardCommissionAmount, count(*)
 
  Count,
@@ -73,7 +73,7 @@ CASE
 
 CASE
 when CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) in ('17', '18')
-then CAST((CASE when sd.chargecommission is null then 0.00 else sd.chargecommission end) as bigint)
+then CAST((CASE when sd.chargecommission is null then 0.00 else sd.chargecommission end) as float)
  else 0.00 end as CardCommissionAmount
 ,
 --adding commissionsum to agent 17 and 18
@@ -120,7 +120,7 @@ join [DWHTEST].[dbo].gate_Service s with (nolock) on p.ServiceID=s.ServiceID joi
 
 join [DWHTEST].[dbo].[Paymentmain] m with (nolock) on p.AgentPaymentID = m.PaymentID left join [DWHTEST].[dbo].[sdk_provider_trnsaction] sd with (nolock) on m.TransactionID = sd.p_id
 
-where (StatusDate between '2021-12-01' and '2022-01-01' and sd.p_date between '2021-12-01' and '2022-01-01') 
+where (StatusDate between '2021-12-01' and '2022-01-01' ) 
 and CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) not in ( '3','10','14','20')
 and p.Status=2 
 )pb 
@@ -144,7 +144,7 @@ union all
 
 --adding agent 20
 
-SELECT p.OsmpProviderId as ID,
+SELECT LEFT(p.OsmpProviderId,10) as ID,
        s.ServiceName as ServiceName,
 	   SUM(mm.mpaysum) as Amount,
 	   SUM(mm.mpayprovsum) as ProviderAmount,
