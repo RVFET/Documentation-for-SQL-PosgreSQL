@@ -1,7 +1,10 @@
-select LEFT(pb.ID,10) as ID,pb.ServiceName, SUM(pb.PaySum) Amount,SUM(pb.ProviderSum) ProviderAmount,
+select LEFT(pb.ID,10) as ID,pb.ServiceName, SUM(pb.PaySum) Amount,
+case when SUM(pb.PaySum)!= SUM(pb.ProviderSum)+SUM(pb.CommissionSum)
+then SUM(pb.PaySum)-SUM(pb.CommissionSum)
+else SUM(pb.ProviderSum) end  ProviderAmount,
 SUM(pb.CommissionSum) CommissionAmount, SUM(pb.CardCommissionAmount) CardCommissionAmount, count(*)
 
- Count,
+ Count_,
 pb.Agent ,pb.ProviderName  
 from (select 
   case when s.ProviderID=51 
@@ -53,7 +56,7 @@ from (select
 --adding providersum to agent 17 and 18
 
 CASE
-    when CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) in ('17', '18')
+    when p.Agent in ('17', '18')
 	then 
 	--checking null values
 	case
@@ -67,20 +70,22 @@ CASE
 	then (CAST(CAST (p.[PaymentInfo].query('data(root/debt)') as nvarchar) as float))
 	when p.ServiceID  in (254,255)
     then p.[ProviderSum] - CAST(CAST(p.PaymentInfo.query('data(r/overpaid)') as nvarchar) as decimal(7,2))
+	when p.ProviderSum=p.PaySum
+	then p.PaySum-p.CommissionSum
 	else p.ProviderSum end ProviderSum
 ,
 --adding cardcommissionsum to agent 17 and 18
 
 CASE
-when CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) in ('17', '18')
-then CAST((CASE when sd.chargecommission is null then 0.00 else sd.chargecommission end) as float)
- else 0.00 end as CardCommissionAmount
+when p.Agent in  ('17', '18')
+then (CASE when sd.chargecommission is null then 0.00 else sd.chargecommission end)
+ else 0.00 end  as CardCommissionAmount
 ,
 --adding commissionsum to agent 17 and 18
 
-CASE 
-    when CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) in ('17', '18')
-	then CAST((CASE when sd.purchasecommission is null then 0.00 else sd.purchasecommission end) as float)
+    CASE 
+    when p.agent in ('17', '18')
+	then (CASE when sd.purchasecommission is null then 0.00 else sd.purchasecommission end)
 	WHEN p.OsmpProviderID in (17217, 17218, 17219, 17220) THEN 1.00	  
 	when p.ServiceID in(126,127)
 	then CAST(CAST(p.[PayFields].query('data(fields/field4)') as nvarchar) as float) 
@@ -95,82 +100,32 @@ CASE
 	when p.ServiceID  in (254,255)
     then (p.[CommissionSum] + CAST(CAST(p.PaymentInfo.query('data(r/overpaid)') as nvarchar) as decimal(7,2))) 
 	when p.CommissionSum is null then 0.00
-	ELSE p.CommissionSum  END AS CommissionSum
+	ELSE p.CommissionSum  END  AS CommissionSum
 
-,CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) as  agent,
+,p.agent as  agent
 
- ROW_NUMBER()OVER(PARTITION BY    case 
-	  when len(CAST([ExtraParams].query('data(r/trm_prv_id)') as nvarchar))>0
-  then CAST([ExtraParams].query('data(r/trm_prv_id)') as nvarchar) 
-      when len( CAST([ExtraParams].query('data(r/online_trm_prv_id)') as nvarchar) )>0 
-  then CAST([ExtraParams].query('data(r/online_trm_prv_id)') as nvarchar) 
-   when len( CAST([ExtraParams].query('data(r/receipt_num)') as nvarchar) )>0 
-  then CAST([ExtraParams].query('data(r/receipt_num)') as nvarchar)end, p.agentterminalid,p.serviceid ORDER BY (case 
-	  when len(CAST([ExtraParams].query('data(r/trm_prv_id)') as nvarchar))>0
-  then CAST([ExtraParams].query('data(r/trm_prv_id)') as nvarchar) 
-      when len( CAST([ExtraParams].query('data(r/online_trm_prv_id)') as nvarchar) )>0 
-  then CAST([ExtraParams].query('data(r/online_trm_prv_id)') as nvarchar) 
-   when len( CAST([ExtraParams].query('data(r/receipt_num)') as nvarchar) )>0 
-  then CAST([ExtraParams].query('data(r/receipt_num)') as nvarchar)end)) as rn
-
-  FROM [DWHTEST].[dbo].[paymentupg] p with (nolock) 
+  FROM [DWHTEST].[dbo].[gate_payment] p with (nolock) 
 join [DWHTEST].[dbo].gate_Service s with (nolock) on p.ServiceID=s.ServiceID join [DWHTEST].[dbo].gate_Provider pp with (nolock) on s.ProviderID=pp.ProviderID 
 
 --joining sdk and upg through main base
 
-join [DWHTEST].[dbo].[Paymentmain] m with (nolock) on p.AgentPaymentID = m.PaymentID left join [DWHTEST].[dbo].[sdk_provider_trnsaction] sd with (nolock) on m.TransactionID = sd.p_id
+join [DWHTEST].[dbo].[main_payment] m with (nolock) on p.AgentPaymentID = m.PaymentID left join [DWHTEST].[dbo].[sdk_provider_trnsaction] sd with (nolock) on m.TransactionID = sd.p_id
 
-where (StatusDate between '2021-12-01' and '2022-01-01' ) 
-and CAST([ExtraParams].query('data(r/agt_id)') as nvarchar) not in ( '3','10','14','20')
-and p.Status=2 
+where (StatusDate between '2022-01-01' and '2022-02-01' ) 
+and p.agent not in ( '3','10','14')
+and p.Status=2  and p.Dublikat=1 
 )pb 
---where pb.rn=1
 
 group by pb.ID, pb.ServiceName, pb.Agent ,pb.ProviderName
 
 --adding kartdan balansin artirilmasi
 
-UNION  all
+ UNION  all
 
 SELECT s.[id] as ID,s.[servicename]  as ServiceName, s.[total] as Amount, s.[amount] as ProviderAmount,
 s.[purchascomission] as CommissionAmount, s.[chargecomission] as CardCommissionAmount, s.[count ] as Count,
 s.[agent] as Agent ,'MPAY MMC'  as ProviderName  
 
-from [DWHTEST].[dbo].[sdk_report_by_services] s
+from [DWHTEST].[dbo].[sdk_report_by_services] s with (nolock) 
 
 where s.id = 1018
-
-union all
-
---adding agent 20
-
-SELECT LEFT(p.OsmpProviderId,10) as ID,
-       s.ServiceName as ServiceName,
-	   SUM(mm.mpaysum) as Amount,
-	   SUM(mm.mpayprovsum) as ProviderAmount,
-	   SUM(mm.mpaycommsum) as CommisionAmount,
-	   0.00 as CardComissionAmount,
-	   mm.count as Count,
-	   '20' as Agent,
-	   pp.ProviderName as ProviderName
-from
-(select [id_service],sum([sum_income]/100)mpaysum ,sum([sum_outcome]/100) mpayprovsum,
-sum([sum_comm]/100)mpaycommsum,count(m.id_operation) as count from [DWHTEST].dbo.master m join [dbo].[work_legals] l on m.id_legal=l.id_legal
-where state = 60       
-       and substate = 0
-       and time_process >= '2021-12-01' 
-       and time_process < '2022-01-01' 
-       and time_server >= DATEADD(DAY,-7,'2021-12-01')
-       and time_server < DATEADD(DAY,+7,'2022-01-01' )   and l.id_legal=1  --or l.id_legal=23
-group by [id_service]) mm 
-left join [DWHTEST].[dbo].[Relationship] r
-on mm.id_service=r.eManatID
- left join [DWHTEST].[dbo].[paymentupg] p
-on p.OsmpProviderId=r.ModenisID 
- join [DWHTEST].[dbo].gate_Service s with (nolock) on p.ServiceID=s.ServiceID join [DWHTEST].[dbo].gate_Provider pp with (nolock) on s.ProviderID=pp.ProviderID 
- group by p.OsmpProviderID, s.ServiceName,pp.ProviderName,mm.count
-
-order by pb.ProviderName,pb.ServiceName
-
-
-
