@@ -266,3 +266,36 @@ EXECUTE [dbo].[GetNewPayment]
 --,@Debug
 GO
 ```
+
+
+
+EMDK - ALL - PL/SQL
+
+
+SELECT p."Number" ,AgentPaymentID, 
+CAST((xpath('/r/id/text()',p.PaymentInfo ::xml))[1]::TEXT  as varchar) as id ,
+CAST((xpath('/r/serviceName/text()',p.PaymentInfo ::xml))[1]::TEXT  as varchar) as serviceName,
+PaySum,
+ProviderSum - CAST((xpath('/r/overpaid/text()',p.PaymentInfo ::xml))[1]::text as decimal) as ProviderSum
+,CommissionSum + CAST((xpath('/r/overpaid/text()',p.PaymentInfo ::xml))[1]::text as decimal) as Comission,
+CAST((xpath('/r/agt_id/text()',p.ExtraParams ::xml))[1]::TEXT  as varchar) as Agent
+,pp.ProviderName
+FROM
+reckon.gate_payment p  full join reckon.gate_service  s on p.ServiceID=s.ServiceID full join reckon.gate_provider pp on s.ProviderID=pp.ProviderID
+WHERE (StatusDate BETWEEN '2022-05-01' and '2022-06-01'
+and CAST((xpath('/r/agt_id/text()',p.ExtraParams ::xml))[1]::TEXT  as varchar) not in ( '3','10','14')
+)
+and Status=2
+and p.ServiceID in (254,255)
+UNION ALL
+SELECT p."Number",AgentPaymentID,
+CAST((xpath('/r/id/text()',p.PaymentInfo ::xml))[1]::TEXT  as varchar) as id,
+CAST((xpath('/r/serviceName/text()',p.PaymentInfo ::xml))[1]::TEXT  as varchar) as serviceName,
+PaySum,ProviderSum,CommissionSum, CAST((xpath('/r/agt_id/text()',p.ExtraParams ::xml))[1]::TEXT  as varchar) as Agent
+,pp.ProviderName
+FROM reckon.gate_payment p
+full join reckon.gate_service  s on p.ServiceID=s.ServiceID full join reckon.gate_provider pp on s.ProviderID=pp.ProviderID
+WHERE (StatusDate BETWEEN '2022-05-01' and '2022-06-01' and CAST((xpath('/r/agt_id/text()',p.ExtraParams ::xml))[1]::TEXT  as varchar)  not in ( '3','10','14')
+)
+and Status=2
+and p.ServiceID in (257,258,259,260,261,262,263,264)
